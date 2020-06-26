@@ -32,6 +32,10 @@ user が中間テーブル relationships を取得し、
     
     #user.followersの機能提供
     has_many :followers, through: :reverses_of_relationship, source: :user
+    
+    has_many :favorites
+    
+    has_many :likes, through: :favorites, source: :micropost
 
 #フォローしようとしている人(other_user) が自分自身ではないか
 #self=User
@@ -50,6 +54,19 @@ user が中間テーブル relationships を取得し、
         self.followings.include?(other_user)
     end
     
+    def addlike(micropost)
+        self.favorites.find_or_create_by(micropost_id: micropost.id)
+    end
+    
+    def unlike(micropost)
+        favorite = self.favorites.find_by(micropost_id: micropost.id)
+        favorite.destroy if favorite
+    end
+    
+    def liking?(micropost)
+        self.likes.include?(micropost)
+    end
+ 
      def feed_microposts
         Micropost.where(user_id: self.following_ids + [self.id])
      end
